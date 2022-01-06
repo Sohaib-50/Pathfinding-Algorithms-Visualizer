@@ -2,7 +2,7 @@ import pygame
 from colors import LT_BLUE, DK_BLUE, LT_GREY, DK_GREY, RED, GREEN, BLACK
 from constants import TOP_BOTTOM_PAD
 
-class Cell:
+class Node:
     def __init__(self, row, column):
         self.row = row
         self.column = column
@@ -10,6 +10,8 @@ class Cell:
         self.is_goal = False
         self.is_start = False
         self.is_wall = False
+        self.parent = None
+        self.is_path = False
         
     def set_as_start(self):
         self.is_start = True
@@ -23,27 +25,96 @@ class Cell:
         self.is_wall = True
         self.color = BLACK
 
+    def set_as_path(self):
+        self.is_path = True
+        self.color = LT_BLUE
+
     def set_as_normal(self):
         self.is_wall = False
         self.is_goal = False
         self.is_start = False
+        self.is_path = False
+        self.parent = None
         self.color = LT_GREY
+
+
+    def set_as_visited(self):
+        self.color = DK_GREY
+
+    def __str__(self):
+        return f"Node({self.row}, {self.column})"
 
 class Grid:
     def __init__(self, window, rows, columns):
         self.rows = rows
         self.columns = columns
-        self.grid = [[Cell(row, column) for column in range(columns)] for row in range(rows)]
+        self.grid = [[Node(row, column) for column in range(columns)] for row in range(rows)]
         grid_height = window.get_height() - (TOP_BOTTOM_PAD * 2)
         self.cell_size = grid_height // rows
+        self.y_start = TOP_BOTTOM_PAD
+        self.x_start = (window.get_width() - (self.columns * self.cell_size)) // 2
 
     def draw(self, window):
-        y_start = TOP_BOTTOM_PAD
-        x_start = (window.get_width() - (self.columns * self.cell_size)) // 2
         for row in self.grid:
             for cell in row:
-                pygame.draw.rect(window, cell.color, (x_start + cell.column * self.cell_size, y_start + cell.row * self.cell_size, self.cell_size, self.cell_size))
-                pygame.draw.rect(window, BLACK, (x_start + cell.column * self.cell_size, y_start + cell.row * self.cell_size, self.cell_size, self.cell_size), 2)
+                pygame.draw.rect(window, cell.color, (self.x_start + cell.column * self.cell_size, self.y_start + cell.row * self.cell_size, self.cell_size, self.cell_size))
+                pygame.draw.rect(window, BLACK, (self.x_start + cell.column * self.cell_size, self.y_start + cell.row * self.cell_size, self.cell_size, self.cell_size), 2)
 
-
+    def draw_cell(self, window, node):
+        pygame.draw.rect(window, node.color, (self.x_start + node.column * self.cell_size, self.y_start + node.row * self.cell_size, self.cell_size, self.cell_size))
+        pygame.draw.rect(window, BLACK, (self.x_start + node.column * self.cell_size, self.y_start + node.row * self.cell_size, self.cell_size, self.cell_size), 2)
         
+    def get_start_node(self) -> Node:
+        for row in self.grid:
+            for cell in row:
+                if cell.is_start:
+                    return cell
+
+    def get_neighbors(self, node):
+        neighbors = set()
+        left_coordinate = (node.row, node.column - 1)
+        right_coordinate = (node.row, node.column + 1)
+        top_coordinate = (node.row - 1, node.column)
+        bottom_coordinate = (node.row + 1, node.column)
+        # diagonal_top_left = (node.row - 1, node.column - 1)
+        # diagonal_top_right = (node.row - 1, node.column + 1)
+        # diagonal_bottom_left = (node.row + 1, node.column - 1)
+        # diagonal_bottom_right = (node.row + 1, node.column + 1)
+
+        if self.is_valid_coordinate(*left_coordinate) and not self.grid[left_coordinate[0]][left_coordinate[1]].is_wall:
+            neighbors.add(self.grid[left_coordinate[0]][left_coordinate[1]])
+        if self.is_valid_coordinate(*right_coordinate) and not self.grid[right_coordinate[0]][right_coordinate[1]].is_wall:
+            neighbors.add(self.grid[right_coordinate[0]][right_coordinate[1]])
+        if self.is_valid_coordinate(*top_coordinate) and not self.grid[top_coordinate[0]][top_coordinate[1]].is_wall:
+            neighbors.add(self.grid[top_coordinate[0]][top_coordinate[1]])
+        if self.is_valid_coordinate(*bottom_coordinate) and not self.grid[bottom_coordinate[0]][bottom_coordinate[1]].is_wall:
+            neighbors.add(self.grid[bottom_coordinate[0]][bottom_coordinate[1]])
+        # if self.is_valid_coordinate(*diagonal_top_left) and not self.grid[diagonal_top_left[0]][diagonal_top_left[1]].is_wall:
+        #     neighbors.add(self.grid[diagonal_top_left[0]][diagonal_top_left[1]])
+        # if self.is_valid_coordinate(*diagonal_top_right) and not self.grid[diagonal_top_right[0]][diagonal_top_right[1]].is_wall:
+        #     neighbors.add(self.grid[diagonal_top_right[0]][diagonal_top_right[1]])
+        # if self.is_valid_coordinate(*diagonal_bottom_left) and not self.grid[diagonal_bottom_left[0]][diagonal_bottom_left[1]].is_wall:
+        #     neighbors.add(self.grid[diagonal_bottom_left[0]][diagonal_bottom_left[1]])
+        # if self.is_valid_coordinate(*diagonal_bottom_right) and not self.grid[diagonal_bottom_right[0]][diagonal_bottom_right[1]].is_wall:
+        #     neighbors.add(self.grid[diagonal_bottom_right[0]][diagonal_bottom_right[1]])
+        return neighbors
+
+        # if node.row > 0 and not self.grid[left_coordinate[0]][left_coordinate[1]].is_wall:
+        #     neighbors.append(self.grid[left_coordinate[0]][left_coordinate[1]])
+        # if node.row < self.rows - 1 and not self.grid[right_coordinate[0]][right_coordinate[1]].is_wall:
+        #     neighbors.append(self.grid[right_coordinate[0]][right_coordinate[1]])
+        # if node.column > 0 and not self.grid[top_coordinate[0]][top_coordinate[1]].is_wall:
+        #     neighbors.append(self.grid[top_coordinate[0]][top_coordinate[1]])
+        # if node.column < self.columns - 1 and not self.grid[bottom_coordinate[0]][bottom_coordinate[1]].is_wall:
+        #     neighbors.append(self.grid[bottom_coordinate[0]][bottom_coordinate[1]])
+
+        # return neighbors
+
+    def is_valid_coordinate(self, row, column):
+        return row >= 0 and row < self.rows and column >= 0 and column < self.columns
+
+    def reset(self):
+        for row in self.grid:
+            for cell in row:
+                cell.set_as_normal()
+                
