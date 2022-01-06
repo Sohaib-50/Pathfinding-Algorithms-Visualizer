@@ -21,6 +21,12 @@ class Cell:
 
     def set_as_wall(self):
         self.is_wall = True
+        self.color = BLACK
+
+    def set_as_normal(self):
+        self.is_wall = False
+        self.is_goal = False
+        self.is_start = False
         self.color = LT_GREY
 
 class Grid:
@@ -28,8 +34,8 @@ class Grid:
         self.rows = rows
         self.columns = columns
         self.grid = [[Cell(row, column) for column in range(columns)] for row in range(rows)]
-        grid_size = window.get_height() - (TOP_BOTTOM_PAD * 2)
-        self.cell_size = grid_size // rows
+        grid_height = window.get_height() - (TOP_BOTTOM_PAD * 2)
+        self.cell_size = grid_height // rows
 
     def draw(self, window):
         y_start = TOP_BOTTOM_PAD
