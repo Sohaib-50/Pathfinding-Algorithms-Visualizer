@@ -3,7 +3,7 @@ from colors import LT_BLUE, DK_BLUE, LT_GREY, DK_GREY, RED, GREEN, BLACK
 from grid import Grid
 import math
 from constants import TOP_BOTTOM_PAD, ROWS, COLS, BG_COLOR
-from algorithms import DepthFirstSearch, BreadthFirstSearch
+from algorithms import DepthFirstSearch, BreadthFirstSearch, UniformCostSearch, GreedyBestFirstSearch, AStarSearch
 
 HEIGHT = 680  
 WIDTH = int((3 * HEIGHT) / 2)  # 3:2 aspect ratio
@@ -20,7 +20,7 @@ setting_walls = False
 setting_start = False
 setting_goal = False
 solving = False
-
+solved = False
 
 running = True
 setting_start = True
@@ -110,7 +110,7 @@ while running:
                     drawing_walls = True
 
     if solving:
-        algorithm = DepthFirstSearch(window)
+        algorithm = AStarSearch(window)
         result = algorithm.start_solving(grid)
         if result:
             solving = False
@@ -134,5 +134,6 @@ while running:
             grid.reset()
 
 
-
     pygame.display.update()
+
+

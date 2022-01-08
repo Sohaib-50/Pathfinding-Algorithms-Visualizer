@@ -12,6 +12,8 @@ class Node:
         self.is_wall = False
         self.parent = None
         self.is_path = False
+        self.path_cost = 0
+        self.state = (self.row, self.column)
         
     def set_as_start(self):
         self.is_start = True
@@ -37,12 +39,34 @@ class Node:
         self.parent = None
         self.color = LT_GREY
 
-
     def set_as_visited(self):
         self.color = DK_GREY
 
     def __str__(self):
         return f"Node({self.row}, {self.column})"
+
+    def __ge__(self, other: "Node") -> bool:
+        return self.path_cost >= other.path_cost
+
+    def __gt__(self, other: "Node") -> bool:
+        return self.path_cost > other.path_cost
+
+    def __le__(self, other: "Node") -> bool:
+        return self.path_cost <= other.path_cost
+
+    def __lt__(self, other: "Node") -> bool:
+        return self.path_cost < other.path_cost
+
+    def __eq__(self, other: "Node") -> bool:
+        return self.path_cost == other.path_cost
+
+    def __ne__(self, other: "Node") -> bool:
+        return self.path_cost != other.path_cost
+
+    def __hash__(self):
+        return hash((self.row, self.column))
+
+
 
 class Grid:
     def __init__(self, window, rows, columns):
@@ -69,8 +93,15 @@ class Grid:
             for cell in row:
                 if cell.is_start:
                     return cell
+    
+    def get_goal_node(self) -> Node:
+        for row in self.grid:
+            for cell in row:
+                if cell.is_goal:
+                    return cell
 
     def get_neighbors(self, node):
+        # NOTE: Don't allow diagonal movement or else it will pass through walls (untill a solution is found)
         neighbors = set()
         left_coordinate = (node.row, node.column - 1)
         right_coordinate = (node.row, node.column + 1)
@@ -109,6 +140,12 @@ class Grid:
         #     neighbors.append(self.grid[bottom_coordinate[0]][bottom_coordinate[1]])
 
         # return neighbors
+
+    def get_manhattan_distance_heuristic(self, node1: Node,):
+        goal = self.get_goal_node()
+        return abs(node1.row - goal.row) + abs(node1.column - goal.column)
+        # import math
+        # return math.sqrt((node1.column - node2.column) ** 2 + (node1.row - node2.row) ** 2)
 
     def is_valid_coordinate(self, row, column):
         return row >= 0 and row < self.rows and column >= 0 and column < self.columns
