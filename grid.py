@@ -150,8 +150,24 @@ class Grid:
     def is_valid_coordinate(self, row, column):
         return row >= 0 and row < self.rows and column >= 0 and column < self.columns
 
-    def reset(self):
+    def reset(self, keep_current_configuration=False):
         for row in self.grid:
             for cell in row:
-                cell.set_as_normal()
+                cell.parent = None
+                if not keep_current_configuration:
+                    cell.set_as_normal()
+                else:
+                    if cell.is_start:
+                        cell.set_as_start()
+                    elif cell.is_goal:
+                        cell.set_as_goal()
+                    elif cell.is_wall:
+                        cell.set_as_wall()
+                    else:
+                        cell.set_as_normal()
+                # if keep_current_configuration:
+                #     if not any([cell.is_start, cell.is_goal, cell.is_wall]):  # if cell isn't start, goal or wall
+                #         cell.set_as_normal()
+                # else:
+                #     cell.set_as_normal()
                 
