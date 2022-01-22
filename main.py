@@ -1,5 +1,5 @@
 import pygame
-from colors import LT_BLUE, DK_BLUE, LT_GREY, DK_GREY, RED, GREEN, BLACK
+from colors import LT_BLUE, DK_BLUE, LT_GREY, DK_GREY, RED, GREEN, BLACK, WHITE
 from grid import Grid
 import math
 from constants import TOP_BOTTOM_PAD, ROWS, COLS, BG_COLOR
@@ -14,6 +14,12 @@ window = pygame.display.set_mode((WIDTH, HEIGHT))
 window.fill(BG_COLOR)
 
 grid = Grid(window, ROWS, COLS)
+instructional_font = pygame.font.SysFont("roboto", 30)
+button_font = pygame.font.SysFont("roboto", 25)
+instructional_font_color = WHITE
+button_font_color = BLACK
+button_color = WHITE
+button_border_color = LT_BLUE
 
 # state variables
 drawing_walls = False
@@ -28,128 +34,182 @@ solved = False
 running = True
 setting_start = True
 while running:
-    pygame.time.Clock().tick(120)  # limit to 120 FPS
+    # pygame.time.Clock().tick()  # limit to 120 FPS
     window.fill(BG_COLOR)
     grid.draw(window)
     # Set Instructional texts and buttons
     if setting_start:
-        # write "Set start node by clicking on a cell" in top left of window
-        text = "Set start by clicking on the grid"
-        font = pygame.font.SysFont("Arial", 20)
-        text_surface = font.render(text, True, LT_BLUE)
-        window.blit(text_surface, (10, 10))
+        text = "Set start node by clicking on the grid"
+        text_surface = instructional_font.render(text, True, instructional_font_color)
+        window.blit(text_surface, text_surface.get_rect(center=(WIDTH // 2, TOP_BOTTOM_PAD // 2)))
     elif setting_goal:
         # write "Set goal node by clicking on a cell" in top left of window
         text = "Set goal by clicking on the grid"
-        font = pygame.font.SysFont("Arial", 20)
-        text_surface = font.render(text, True, LT_BLUE)
-        window.blit(text_surface, (10, 10))
+        text_surface = instructional_font.render(text, True, instructional_font_color)
+        window.blit(text_surface, text_surface.get_rect(center=(WIDTH // 2, TOP_BOTTOM_PAD // 2)))
     elif setting_walls:
-        # write "Set walls by clicking on cells. " in top left of window
-        text = "Set walls by clicking cells. Click Solve when done."
-        font = pygame.font.SysFont("Arial", 20)
-        text_surface = font.render(text, True, LT_BLUE)
-        window.blit(text_surface, (10, 10))
-        # button with text "Solve"
-        pygame.draw.rect(window, LT_BLUE, (WIDTH - 100, 10, 80, 30))
-        text_surface = font.render("Solve", True, DK_BLUE)
-        window.blit(text_surface, (WIDTH - 90, 20))
-        # if stop button is clicked, set setting_walls to False
+        # text "Set walls by clicking on cells. " in top left of window
+        text = "Set walls by clicking and dragging. Press left mouse button to set, right to remove."
+        text_surface = instructional_font.render(text, True, instructional_font_color)
+        window.blit(text_surface, text_surface.get_rect(center=(WIDTH // 2, TOP_BOTTOM_PAD // 2)))
+        # button with text "Choose Algorithm" below grid
+        text = "Choose Algorithm"
+        text_surface = button_font.render(text, True, button_font_color)
+        button_rect = text_surface.get_rect(center=(WIDTH // 2, HEIGHT - TOP_BOTTOM_PAD // 2))
+        button_rect.height += 20
+        button_rect.width += 20
+        button_rect.center = (WIDTH // 2, HEIGHT - TOP_BOTTOM_PAD // 2)
+        pygame.draw.rect(window, button_color, button_rect, border_radius=3)
+        pygame.draw.rect(window, button_border_color, button_rect, 2, border_radius=3)
+        window.blit(text_surface, text_surface.get_rect(center=(WIDTH // 2, HEIGHT - TOP_BOTTOM_PAD // 2)))
+        # button click logic
         if pygame.mouse.get_pressed()[0]:
             pos = pygame.mouse.get_pos()
-            if WIDTH - 100 < pos[0] < WIDTH - 10 and 10 < pos[1] < 40:
+            if button_rect.collidepoint(pos):
                 setting_walls = False
                 choosing_algo = True
     elif choosing_algo:
-        # write "Choose an algorithm by clicking on a button" in top left of window
-        text = "Choose an algorithm by clicking on a button"
-        font = pygame.font.SysFont("Arial", 20)
-        text_surface = font.render(text, True, LT_BLUE)
-        window.blit(text_surface, (10, 10))
-        # draw buttons for each algorithm horizontally across the top of the window
-        pygame.draw.rect(window, LT_BLUE, (10, 10, 80, 30))
-        text_surface = font.render("Depth-First", True, DK_BLUE)
-        window.blit(text_surface, (20, 20))
-        pygame.draw.rect(window, LT_BLUE, (100, 10, 80, 30))
-        text_surface = font.render("Breadth-First", True, DK_BLUE)
-        window.blit(text_surface, (110, 20))
-        pygame.draw.rect(window, LT_BLUE, (190, 10, 80, 30))
-        text_surface = font.render("Uniform-Cost", True, DK_BLUE)
-        window.blit(text_surface, (200, 20))
-        pygame.draw.rect(window, LT_BLUE, (280, 10, 80, 30))
-        text_surface = font.render("Greedy-Best", True, DK_BLUE)
-        window.blit(text_surface, (290, 20))
-        pygame.draw.rect(window, LT_BLUE, (370, 10, 80, 30))
-        text_surface = font.render("A*", True, DK_BLUE)
-        window.blit(text_surface, (380, 20))
-        # logic for button clicking / choosing algorithms
+        # text "Choose an algorithm by clicking on a button"
+        text = "Select an algorithm."
+        text_surface = instructional_font.render(text, True, instructional_font_color)
+        window.blit(text_surface, text_surface.get_rect(center=(WIDTH // 2, TOP_BOTTOM_PAD // 2)))
+        # buttons for each algorithm below grid
+        text = "Depth First Search"
+        text_surface = button_font.render(text, True, button_font_color)
+        dfs_button_rect = text_surface.get_rect(center=(WIDTH // 2, HEIGHT - TOP_BOTTOM_PAD // 2))
+        dfs_button_rect.height += 10
+        dfs_button_rect.width += 30
+        dfs_button_rect.x = 10 + 50
+        dfs_button_rect.y = HEIGHT - TOP_BOTTOM_PAD // 2
+        pygame.draw.rect(window, button_color, dfs_button_rect, border_radius=3)
+        pygame.draw.rect(window, button_border_color, dfs_button_rect, 2, border_radius=3)
+        window.blit(text_surface, text_surface.get_rect(x=dfs_button_rect.x + 5, y=dfs_button_rect.y + 5))
+        text = "Breadth First Search"
+        text_surface = button_font.render(text, True, button_font_color)
+        bfs_button_rect = text_surface.get_rect(center=(WIDTH // 2, HEIGHT - TOP_BOTTOM_PAD // 2))
+        bfs_button_rect.height += 10
+        bfs_button_rect.width += 10
+        bfs_button_rect.x = 200 + 50
+        bfs_button_rect.y = HEIGHT - TOP_BOTTOM_PAD // 2
+        pygame.draw.rect(window, button_color, bfs_button_rect, border_radius=3)
+        pygame.draw.rect(window, button_border_color, bfs_button_rect, 2, border_radius=3)
+        window.blit(text_surface, text_surface.get_rect(x=bfs_button_rect.x + 5, y=bfs_button_rect.y + 5))
+        text = "Greedy Best First Search"
+        text_surface = button_font.render(text, True, button_font_color)
+        grbfs_button_rect = text_surface.get_rect(center=(WIDTH // 2, HEIGHT - TOP_BOTTOM_PAD // 2))
+        grbfs_button_rect.height += 10
+        grbfs_button_rect.width += 10
+        grbfs_button_rect.x = 385 + 50
+        grbfs_button_rect.y = HEIGHT - TOP_BOTTOM_PAD // 2
+        pygame.draw.rect(window, button_color, grbfs_button_rect, border_radius=3)
+        pygame.draw.rect(window, button_border_color, grbfs_button_rect, 2, border_radius=3)
+        window.blit(text_surface, text_surface.get_rect(x=grbfs_button_rect.x + 5, y=grbfs_button_rect.y + 5))
+        text = "Uniform Cost Search"
+        text_surface = button_font.render(text, True, button_font_color)
+        ucs_button_rect = text_surface.get_rect(center=(WIDTH // 2, HEIGHT - TOP_BOTTOM_PAD // 2))
+        ucs_button_rect.height += 10
+        ucs_button_rect.width += 10
+        ucs_button_rect.x = 605 + 50
+        ucs_button_rect.y = HEIGHT - TOP_BOTTOM_PAD // 2
+        pygame.draw.rect(window, button_color, ucs_button_rect, border_radius=3)
+        pygame.draw.rect(window, button_border_color, ucs_button_rect, 2, border_radius=3)
+        window.blit(text_surface, text_surface.get_rect(x=ucs_button_rect.x + 5, y=ucs_button_rect.y + 5))
+        text = "A-star Search"
+        text_surface = button_font.render(text, True, button_font_color)
+        astar_button_rect = text_surface.get_rect(center=(WIDTH // 2, HEIGHT - TOP_BOTTOM_PAD // 2))
+        astar_button_rect.height += 10
+        astar_button_rect.width += 10
+        astar_button_rect.x = 790 + 50
+        astar_button_rect.y = HEIGHT - TOP_BOTTOM_PAD // 2
+        pygame.draw.rect(window, button_color, astar_button_rect, border_radius=3)
+        pygame.draw.rect(window, button_border_color, astar_button_rect, 2, border_radius=3)
+        window.blit(text_surface, text_surface.get_rect(x=astar_button_rect.x + 5, y=astar_button_rect.y + 5))
+        # button click logic
         if pygame.mouse.get_pressed()[0]:
             pos = pygame.mouse.get_pos()
-            if 10 < pos[0] < 90 and 10 < pos[1] < 40:
+            if dfs_button_rect.collidepoint(pos):
                 algorithm = DepthFirstSearch(window)
                 choosing_algo = False
                 solving = True
-            elif 100 < pos[0] < 180 and 10 < pos[1] < 40:
+            elif bfs_button_rect.collidepoint(pos):
                 algorithm = BreadthFirstSearch(window)
                 choosing_algo = False
                 solving = True
-            elif 190 < pos[0] < 270 and 10 < pos[1] < 40:
-                algorithm = UniformCostSearch(window)
-                choosing_algo = False
-                solving = True
-            elif 280 < pos[0] < 360 and 10 < pos[1] < 40:
+            elif grbfs_button_rect.collidepoint(pos):
                 algorithm = GreedyBestFirstSearch(window)
                 choosing_algo = False
                 solving = True
-            elif 370 < pos[0] < 450 and 10 < pos[1] < 40:
+            elif ucs_button_rect.collidepoint(pos):
+                algorithm = UniformCostSearch(window)
+                choosing_algo = False
+                solving = True
+            elif astar_button_rect.collidepoint(pos):
                 algorithm = AStarSearch(window)
                 choosing_algo = False
                 solving = True
     elif solving:
         window.fill(BG_COLOR)
-        # write "Solving..." in top left of window
         text = "Solving..."
-        font = pygame.font.SysFont("Arial", 20)
-        text_surface = font.render(text, True, LT_BLUE)
-        window.blit(text_surface, (10, 10))
+        text_surface = instructional_font.render(text, True, instructional_font_color)
+        window.blit(text_surface, text_surface.get_rect(center=(WIDTH // 2, TOP_BOTTOM_PAD // 2)))
         grid.draw(window)
-        # algorithm = GreedyBestFirstSearch(window)
+        pygame.display.update()
+
         result = algorithm.start_solving(grid)
-        if result:
+        if result:  # if path found
+            # draw path
             for path_node in result:
-                # print("Drawing path")
                 grid.grid[path_node.row][path_node.column].set_as_path()
                 grid.draw(window)
                 pygame.display.update()
         solving = False
         solved = True
-        # write "Solved!" in top left of window
-        text = "Solved!" if result else "No Possible solution"
-        font = pygame.font.SysFont("Arial", 20)
-        text_surface = font.render(text, True, LT_BLUE)
-        window.blit(text_surface, (10, 10))
     elif solved:
-        # button with text "Choose algorithm again
-        pygame.draw.rect(window, LT_BLUE, (WIDTH - 100, 10, 80, 30))
-        text_surface = font.render("Choose algorithm again", True, DK_BLUE)
-        window.blit(text_surface, (WIDTH - 90, 20))
-        # button with text "Reset"
-        pygame.draw.rect(window, LT_BLUE, (WIDTH - 200, 10, 80, 30))
-        text_surface = font.render("Reset", True, DK_BLUE)
-        window.blit(text_surface, (WIDTH - 190, 20))
-        # buttons clicking logic
+        # write "Solved!" in top left of window
+        if result:
+            text = "Solved!"
+        else:
+            text = "No possible path"
+        text_surface = instructional_font.render(text, True, instructional_font_color)
+        window.blit(text_surface, text_surface.get_rect(center=(WIDTH // 2, TOP_BOTTOM_PAD // 2)))
+        # buttons for choose algorithm again or reset below grid
+        text = "Choose another algorithm"
+        text_surface = button_font.render(text, True, button_font_color)
+        choose_algo_button_rect = text_surface.get_rect(center=(WIDTH // 2, HEIGHT - TOP_BOTTOM_PAD // 2))
+        choose_algo_button_rect.height += 20
+        choose_algo_button_rect.width += 10
+        choose_algo_button_rect.x = 325
+        choose_algo_button_rect.y = HEIGHT - TOP_BOTTOM_PAD // 2 - 20
+        pygame.draw.rect(window, button_color, choose_algo_button_rect, border_radius=3)
+        pygame.draw.rect(window, button_border_color, choose_algo_button_rect, 2, border_radius=3)
+        window.blit(text_surface, text_surface.get_rect(x=choose_algo_button_rect.x + 5, y=choose_algo_button_rect.y + 10))
+        text = "Reset"
+        text_surface = button_font.render(text, True, button_font_color)
+        reset_button_rect = text_surface.get_rect(center=(WIDTH // 2, HEIGHT - TOP_BOTTOM_PAD // 2))
+        reset_button_rect.height += 20
+        reset_button_rect.width += 10
+        reset_button_rect.x = 600
+        reset_button_rect.y = HEIGHT - TOP_BOTTOM_PAD // 2 - 20
+        pygame.draw.rect(window, button_color, reset_button_rect, border_radius=3)
+        pygame.draw.rect(window, button_border_color, reset_button_rect, 2, border_radius=3)
+        window.blit(text_surface, text_surface.get_rect(x=reset_button_rect.x + 5, y=reset_button_rect.y + 10))
+        # buttons click logic
         if pygame.mouse.get_pressed()[0]:
             pos = pygame.mouse.get_pos()
-            if WIDTH - 100 < pos[0] < WIDTH - 10 and 10 < pos[1] < 40:
-                print("Choose algorithm again")
-                grid.reset(keep_current_configuration=True)
-                choosing_algo = True
+            if choose_algo_button_rect.collidepoint(pos):
                 solved = False
-            elif WIDTH - 200 < pos[0] < WIDTH - 10 and 10 < pos[1] < 40:
-                print("Reset")
-                grid.reset()
+                choosing_algo = True
+                grid.reset(keep_current_configuration=True)
+                window.fill(BG_COLOR)
+                grid.draw(window)
+            elif reset_button_rect.collidepoint(pos):
                 solved = False
                 setting_start = True
+                grid.reset()
+                window.fill(BG_COLOR)
+                grid.draw(window)
+        pygame.display.update()
+
 
     for event in pygame.event.get():
         if event.type == pygame.QUIT:

@@ -31,7 +31,7 @@ class SearchAlgorithm:
                     visited.add(neighbor)
             grid.draw_cell(self.window, current_node)  # draw current node to show it is visited
             pygame.display.update()
-            print(f"frontier: {self.frontier}")
+            # print(f"frontier: {self.frontier}")
             
         if not running:
             pygame.display.quit()
@@ -44,14 +44,15 @@ class SearchAlgorithm:
         node = node.parent  # skip the last node
         try:
             while node.parent is not None:
-                print("building path")
+                # print("building path")
                 path.append(node)
                 node = node.parent
         except:
-            print(f"frontier: {self.frontier}")
+            pass
+            # print(f"frontier: {self.frontier}")
         path.reverse()
-        print("Built path")
-        print(self.frontier)
+        # print("Built path")
+        # print(self.frontier)
         return path
 
 
@@ -75,7 +76,6 @@ class UniformCostSearch(SearchAlgorithm):
         closed = set()
         self.frontier.add(grid.get_start_node())
         running = True
-        print(self.frontier)
         while not self.frontier.empty() and running:
             pygame.time.Clock().tick(60)  # limit to 60 FPS
             # check for exit event
@@ -84,7 +84,7 @@ class UniformCostSearch(SearchAlgorithm):
                     running = False
 
             path_cost, current_node = self.frontier.remove()
-            current_node.set_as_visited() if not (current_node.is_start and current_node.is_goal) else None
+            current_node.set_as_visited() if not (current_node.is_start or current_node.is_goal) else None
             if current_node.is_goal:  # goal test
                 return self.build_path(current_node)
             elif current_node in closed:
@@ -100,7 +100,7 @@ class UniformCostSearch(SearchAlgorithm):
                         
             grid.draw_cell(self.window, current_node)  # draw current node to show it is visited
             pygame.display.update()
-            print(f"frontier: {self.frontier}")
+            # print(f"frontier: {self.frontier}")
                 
         if not running:
             pygame.display.quit()
@@ -117,7 +117,7 @@ class AStarSearch(SearchAlgorithm):
         closed = set()
         self.frontier.add(grid.get_start_node(), -1, grid)
         running = True
-        print(self.frontier)
+        # print(self.frontier)
         while not self.frontier.empty() and running:
             pygame.time.Clock().tick(60)  # limit to 60 FPS
             # check for exit event
@@ -143,7 +143,7 @@ class AStarSearch(SearchAlgorithm):
                         
             grid.draw_cell(self.window, current_node)  # draw current node to show it is visited
             pygame.display.update()
-            print(f"frontier: {self.frontier}")
+            # print(f"frontier: {self.frontier}")
                 
         if not running:
             pygame.display.quit()
@@ -204,7 +204,7 @@ class GreedyBestFirstSearch(SearchAlgorithm):
                     visited.add(neighbor)
             grid.draw_cell(self.window, current_node)  # draw current node to show it is visited
             pygame.display.update()
-            print(f"frontier: {self.frontier}")
+            # print(f"frontier: {self.frontier}")
             
         if not running:
             pygame.display.quit()

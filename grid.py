@@ -1,6 +1,7 @@
 import pygame
 from colors import LT_BLUE, DK_BLUE, LT_GREY, DK_GREY, RED, GREEN, BLACK
 from constants import TOP_BOTTOM_PAD
+from random import shuffle
 
 class Node:
     def __init__(self, row, column):
@@ -102,7 +103,7 @@ class Grid:
 
     def get_neighbors(self, node):
         # NOTE: Don't allow diagonal movement or else it will pass through walls (untill a solution is found)
-        neighbors = set()
+        neighbors = []
         left_coordinate = (node.row, node.column - 1)
         right_coordinate = (node.row, node.column + 1)
         top_coordinate = (node.row - 1, node.column)
@@ -113,13 +114,13 @@ class Grid:
         # diagonal_bottom_right = (node.row + 1, node.column + 1)
 
         if self.is_valid_coordinate(*left_coordinate) and not self.grid[left_coordinate[0]][left_coordinate[1]].is_wall:
-            neighbors.add(self.grid[left_coordinate[0]][left_coordinate[1]])
+            neighbors.append(self.grid[left_coordinate[0]][left_coordinate[1]])
         if self.is_valid_coordinate(*right_coordinate) and not self.grid[right_coordinate[0]][right_coordinate[1]].is_wall:
-            neighbors.add(self.grid[right_coordinate[0]][right_coordinate[1]])
+            neighbors.append(self.grid[right_coordinate[0]][right_coordinate[1]])
         if self.is_valid_coordinate(*top_coordinate) and not self.grid[top_coordinate[0]][top_coordinate[1]].is_wall:
-            neighbors.add(self.grid[top_coordinate[0]][top_coordinate[1]])
+            neighbors.append(self.grid[top_coordinate[0]][top_coordinate[1]])
         if self.is_valid_coordinate(*bottom_coordinate) and not self.grid[bottom_coordinate[0]][bottom_coordinate[1]].is_wall:
-            neighbors.add(self.grid[bottom_coordinate[0]][bottom_coordinate[1]])
+            neighbors.append(self.grid[bottom_coordinate[0]][bottom_coordinate[1]])
         # if self.is_valid_coordinate(*diagonal_top_left) and not self.grid[diagonal_top_left[0]][diagonal_top_left[1]].is_wall:
         #     neighbors.add(self.grid[diagonal_top_left[0]][diagonal_top_left[1]])
         # if self.is_valid_coordinate(*diagonal_top_right) and not self.grid[diagonal_top_right[0]][diagonal_top_right[1]].is_wall:
@@ -128,6 +129,7 @@ class Grid:
         #     neighbors.add(self.grid[diagonal_bottom_left[0]][diagonal_bottom_left[1]])
         # if self.is_valid_coordinate(*diagonal_bottom_right) and not self.grid[diagonal_bottom_right[0]][diagonal_bottom_right[1]].is_wall:
         #     neighbors.add(self.grid[diagonal_bottom_right[0]][diagonal_bottom_right[1]])
+        shuffle(neighbors)
         return neighbors
 
         # if node.row > 0 and not self.grid[left_coordinate[0]][left_coordinate[1]].is_wall:
