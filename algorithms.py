@@ -41,7 +41,7 @@ class SearchAlgorithm:
     def build_path(self, node):
         # TODO: Check why try/except is needed
         path = []
-        node = node.parent  # skip the last node
+        # node = node.parent  # skip the last node
         try:
             while node.parent is not None:
                 # print("building path")
@@ -50,10 +50,9 @@ class SearchAlgorithm:
         except:
             pass
             # print(f"frontier: {self.frontier}")
+        path.append(node)  # add the start node which was not added in the loop
         path.reverse()
-        # print("Built path")
-        # print(self.frontier)
-        return path
+        return path  # skip the last node
 
 
 class BreadthFirstSearch(SearchAlgorithm):

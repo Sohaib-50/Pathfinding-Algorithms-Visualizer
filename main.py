@@ -159,9 +159,10 @@ while running:
         if result:  # if path found
             # draw path
             for path_node in result:
-                grid.grid[path_node.row][path_node.column].set_as_path()
-                grid.draw(window)
-                pygame.display.update()
+                if not any((path_node.is_start, path_node.is_goal)):
+                    grid.grid[path_node.row][path_node.column].set_as_path()
+                    grid.draw(window)
+                    pygame.display.update()
         solving = False
         solved = True
     elif solved:
