@@ -10,6 +10,7 @@ WIDTH = int((3 * HEIGHT) / 2)  # 3:2 aspect ratio
 
 # make a pygame window
 pygame.init()
+pygame.display.set_caption('Path Finding Algorithms Visualizer')
 window = pygame.display.set_mode((WIDTH, HEIGHT))
 window.fill(BG_COLOR)
 

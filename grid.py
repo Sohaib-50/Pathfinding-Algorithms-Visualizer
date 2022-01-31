@@ -18,7 +18,7 @@ class Node:
         
     def set_as_start(self):
         self.is_start = True
-        self.color = DK_BLUE
+        self.color = RED
 
     def set_as_goal(self):
         self.is_goal = True
